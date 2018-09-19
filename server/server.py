@@ -17,7 +17,7 @@ class Videos(Resource):
     return {'name': None },404
 
   def post(self, name):
-    vid = {'name':name}
+    vid = { 'name':name }
     videos.append(vid)
     print(videos)
     return vid
@@ -34,8 +34,8 @@ class AllVideos(Resource):
     return { 'videos': videos }
 
 
-api.add_resource(PuppyNames, '/video/<string:name>')
-api.add_resource(AllNames,'/videos')
+api.add_resource(Videos, '/video/<string:name>')
+api.add_resource(AllVideos,'/videos')
 
 if __name__ == '__main__':
   app.run(debug=True)
