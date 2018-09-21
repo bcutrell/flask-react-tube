@@ -1,10 +1,10 @@
 import unittest
-import server
+from app import app 
 import json
 
 class TestIntegrations(unittest.TestCase):
   def setUp(self):
-    self.app = server.app.test_client()
+    self.app = app.test_client()
 
   def test_post(self):
     response = self.app.post('/video/new_video')
