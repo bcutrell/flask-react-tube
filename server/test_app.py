@@ -31,19 +31,30 @@ class TestIntegrations(unittest.TestCase):
     assert json.loads(response.data) == {'name': 'new_video'}
 
   def test_get(self):
-    # first create the object
+    vid = self.create_video()
+
+    response = self.test_client.get('/video/%s' % vid.name)
+    assert json.loads(response.data) == { 'name': vid.name }
+
+  def test_upvote(self):
+    vid = self.create_video()
+    assert vid.upvotes == 0
+
+    response = self.test_client.post('/upvote/%s' % vid.id)
+    assert json.loads(response.data) == { 'name': vid.name, 'upvotes': 1, 'downvotes': 0 }
+
+  def test_downvote(self):
+    vid = self.create_video()
+    assert vid.upvotes == 0
+
+    response = self.test_client.post('/downvote/%s' % vid.id)
+    assert json.loads(response.data) == { 'name': vid.name, 'upvotes': 0, 'downvotes': 1 }
+
+  def create_video(self):
     cast = Video('Cast Away')
     db.session.add(cast)
     db.session.commit()
-
-    response = self.test_client.get('/video/Cast Away')
-    assert json.loads(response.data) == { 'name': 'Cast Away' }
-
-  def test_upvote(self):
-    pass
-
-  def test_downvote(self):
-    pass
+    return cast
 
 if __name__ == '__main__':
   unittest.main()

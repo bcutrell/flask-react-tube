@@ -64,8 +64,24 @@ class AllVideos(Resource):
     videos = Video.query.all()
     return [vid.json() for vid in videos]
 
+# TODO Refactor this into a more reasonable rest structure...
+class UpVote(Resource):
+  def post(self, id):
+    vid = Video.query.filter_by(id=id).first()
+    vid.upvotes += 1
+    return { 'name': vid.name, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
+
+class DownVote(Resource):
+  def post(self, id):
+    vid = Video.query.filter_by(id=id).first()
+    vid.downvotes += 1
+    return { 'name': vid.name, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
+
 api.add_resource(Videos, '/video/<string:name>')
 api.add_resource(AllVideos,'/videos')
+
+api.add_resource(UpVote, '/upvote/<int:id>')
+api.add_resource(DownVote, '/downvote/<int:id>')
 
 if __name__ == '__main__':
   app = create_app()
