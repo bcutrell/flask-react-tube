@@ -5,17 +5,17 @@ from flask_restful import Api,Resource
 from flask_migrate import Migrate
 from datetime import datetime
 
-app = Flask(__name__)
+from config import Config
 
-# Config
-app.config['SECRET_KEY'] = 'mysecretkey'
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy()
+api = Api()
 
-db = SQLAlchemy(app)
-Migrate(app,db)
-api = Api(app)
+def create_app(config_class=Config):
+  app = Flask(__name__)
+  app.config.from_object(config_class)
+  db.init_app(app)
+  Migrate(app,db)
+  return app
 
 # Models
 class Video(db.Model):
@@ -64,10 +64,11 @@ class AllVideos(Resource):
     videos = Video.query.all()
     return [vid.json() for vid in videos]
 
-
 api.add_resource(Videos, '/video/<string:name>')
 api.add_resource(AllVideos,'/videos')
 
 if __name__ == '__main__':
+  app = create_app()
+  api.init_app(app)
   app.run(debug=True)
 
