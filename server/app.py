@@ -16,6 +16,7 @@ api = Api()
 def create_app(config_class=Config):
   app = Flask(__name__)
   app.config.from_object(config_class)
+  cors = CORS(app, resources={r"/*": {"origins": "*"}}, headers="Content-Type")
   db.init_app(app)
   Migrate(app,db)
   return app
@@ -27,21 +28,20 @@ class Video(db.Model):
 
   id = db.Column(db.Integer, primary_key=True)
   title = db.Column(db.String(80), nullable=False)
+  filepath = db.Column(db.String(80))
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   upvotes = db.Column(db.Integer, default=0)
   downvotes = db.Column(db.Integer, default=0)
 
-  def __init__(self,title):
+  def __init__(self,title, filepath):
     self.title=title
+    self.filepath=filepath
 
   def json(self):
-    return {'title': self.title, 'filepath': self.filepath()}
+    return {'title': self.title, 'filepath': self.filepath }
 
   def __str__(self):
     return f"{self.title} "
-
-  def filepath(self):
-    return f"{self.id}_{self.title.strip()}"
 
 class Videos(Resource):
 
@@ -85,7 +85,7 @@ class Upload(Resource):
 
     filepath = '../src/assets/' + args['file'].filename
     args['file'].save(filepath)
-    vid = Video(title=title, filepath=filepath)
+    vid = Video(title=args['title'], filepath=filepath)
     db.session.add(vid)
     db.session.commit()
 
@@ -94,7 +94,8 @@ class Upload(Resource):
       vid = Video.query.order_by(Video.upvotes.desc(), Video.downvotes.asc(), Video.date.desc()).first()
       db.session.delete(vid)
       db.session.commit()
-    return vid.json()
+    
+    return [vid.json() for vid in Video.query.all()]
 
 api.add_resource(Videos, '/video/<string:title>')
 api.add_resource(AllVideos,'/videos')
@@ -107,6 +108,6 @@ api.add_resource(Upload, '/upload')
 if __name__ == '__main__':
   app = create_app()
   api.init_app(app)
-  cors = CORS(app, resources={r"/*": {"origins": "*"}})
+  
   app.run(debug=True)
 

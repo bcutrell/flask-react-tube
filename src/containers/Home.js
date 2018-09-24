@@ -6,21 +6,23 @@ import UploadModal from '../components/UploadModal';
 
 // notes for loading all videos
 // https://github.com/gatsbyjs/gatsby/issues/3663
-import TestImage from '../assets/test.svg';
-import TestVideo from '../assets/test.MOV';
 
 import { addVideo } from '../store/actions';
 
 class Home extends Component {
-    state = {
-        videos: [TestVideo, TestVideo, TestVideo, TestVideo, TestVideo]
-    }
 
     render() {
+
+        let gallery = null;
+        if (this.props.videos ) {
+            const videos = this.props.videos.map( vid => vid.filepath )
+            gallery = <Gallery videos={videos} />
+        }
+
         return (
             <div style={ { marginTop: '75px' }}>
                 <UploadModal submit={this.props.onVideoAdded}  />
-                <Gallery videos={this.state.videos} />
+                { gallery }
             </div>
         )
     }

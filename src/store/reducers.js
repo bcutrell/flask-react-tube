@@ -5,10 +5,9 @@ const initialState = {
 };
 
 const addVideo = ( state, action ) => {
-
     return {
         ...state,
-        videos: [1]
+        videos: action.videos
     }
 }
 
