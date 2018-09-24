@@ -9,7 +9,7 @@ class App extends Component {
     render() {
         return (
             <div>
-                <Menu borderless huge fixed>
+                <Menu borderless fixed={'top'}>
                     <Container>
                       <Menu.Item>
                       <Link to="/">Home</Link>
