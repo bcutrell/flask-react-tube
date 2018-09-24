@@ -12,7 +12,7 @@ class App extends Component {
                 <Menu borderless fixed={'top'}>
                     <Container>
                       <Menu.Item>
-                      <Link to="/">Home</Link>
+                        <Link to="/">Home</Link>
                       </Menu.Item>
                     </Container>
                 </Menu>
