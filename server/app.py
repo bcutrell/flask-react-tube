@@ -26,49 +26,34 @@ class Video(db.Model):
   __tablename__ = 'videos'
 
   id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(80), nullable=False)
+  title = db.Column(db.String(80), nullable=False)
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   upvotes = db.Column(db.Integer, default=0)
   downvotes = db.Column(db.Integer, default=0)
 
-  def __init__(self,name):
-    self.name=name
+  def __init__(self,title):
+    self.title=title
 
   def json(self):
-    return {'name': self.name, 'filepath': self.filepath()}
+    return {'title': self.title, 'filepath': self.filepath()}
 
   def __str__(self):
-    return f"{self.name} "
+    return f"{self.title} "
 
   def filepath(self):
-    return f"{self.id}_{self.name.strip()}"
-
-
+    return f"{self.id}_{self.title.strip()}"
 
 class Videos(Resource):
 
-  def get(self, name):
-    vid = Video.query.filter_by(name=name).first()
+  def get(self, title):
+    vid = Video.query.filter_by(title=title).first()
     if vid:
       return vid.json()
     else:
-      return {'name': None }, 404
+      return {'title': None }, 404
 
-  def post(self, name):
-    vid = Video(name=name)
-    db.session.add(vid)
-    db.session.commit()
-
-    if db.session.query(Video).count() > 10:
-      # Delete the video with the fewest likes
-      vid = Video.query.order_by(Video.upvotes.desc(), Video.downvotes.asc(), Video.date.desc()).first()
-      db.session.delete(vid)
-      db.session.commit()
-
-    return vid.json()
-
-  def delete(self,name):
-    vid = Video.query.filter_by(name=name).first()
+  def delete(self,title):
+    vid = Video.query.filter_by(title=title).first()
     db.session.delete(vid)
     db.session.commit()
     return {'note':'delete successful'}
@@ -83,25 +68,35 @@ class UpVote(Resource):
   def post(self, id):
     vid = Video.query.filter_by(id=id).first()
     vid.upvotes += 1
-    return { 'name': vid.name, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
+    return { 'title': vid.title, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
 
 class DownVote(Resource):
   def post(self, id):
     vid = Video.query.filter_by(id=id).first()
     vid.downvotes += 1
-    return { 'name': vid.name, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
+    return { 'title': vid.title, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
 
 class Upload(Resource):
   def post(self):
     parse = reqparse.RequestParser()
     parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
-    parse.add_argument('name')
+    parse.add_argument('title')
     args = parse.parse_args()
 
-    args['file'].save('../src/assets/new_video')
-    # args['file'].filename
+    filepath = '../src/assets/' + args['file'].filename
+    args['file'].save(filepath)
+    vid = Video(title=title, filepath=filepath)
+    db.session.add(vid)
+    db.session.commit()
 
-api.add_resource(Videos, '/video/<string:name>')
+    if db.session.query(Video).count() > 10:
+      # Delete the video with the fewest likes
+      vid = Video.query.order_by(Video.upvotes.desc(), Video.downvotes.asc(), Video.date.desc()).first()
+      db.session.delete(vid)
+      db.session.commit()
+    return vid.json()
+
+api.add_resource(Videos, '/video/<string:title>')
 api.add_resource(AllVideos,'/videos')
 
 api.add_resource(UpVote, '/upvote/<int:id>')
