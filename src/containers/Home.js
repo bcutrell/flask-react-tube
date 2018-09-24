@@ -18,7 +18,6 @@ class Home extends Component {
             <div style={ { marginTop: '75px' }}>
                 <UploadModal />
                 <Gallery videos={this.state.videos} />
-
             </div>
         )
     }

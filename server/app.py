@@ -32,10 +32,13 @@ class Video(db.Model):
     self.name=name
 
   def json(self):
-    return {'name': self.name}
+    return {'name': self.name, 'filepath': self.filepath()}
 
   def __str__(self):
     return f"{self.name} "
+
+  def filepath(self):
+    return f"{self.id}_{self.name.strip()}"
 
 class Videos(Resource):
 
@@ -44,19 +47,25 @@ class Videos(Resource):
     if vid:
       return vid.json()
     else:
-      return {'name': None },404
+      return {'name': None }, 404
 
   def post(self, name):
     vid = Video(name=name)
     db.session.add(vid)
     db.session.commit()
+
+    if db.session.query(Video).count() > 10:
+      # Delete the video with the fewest likes
+      vid = Video.query.order_by(Video.upvotes.desc(), Video.downvotes.asc(), Video.date.desc()).first()
+      db.session.delete(vid)
+      db.session.commit()
+
     return vid.json()
 
   def delete(self,name):
     vid = Video.query.filter_by(name=name).first()
     db.session.delete(vid)
     db.session.commit()
-
     return {'note':'delete successful'}
 
 class AllVideos(Resource):
