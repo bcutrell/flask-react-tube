@@ -1,10 +1,13 @@
 import os
 from flask import Flask,  request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_restful import Api,Resource
+from flask_restful import Api, Resource, reqparse
 from flask_migrate import Migrate
 from datetime import datetime
 
+import werkzeug
+
+from flask_cors import CORS
 from config import Config
 
 db = SQLAlchemy()
@@ -32,10 +35,15 @@ class Video(db.Model):
     self.name=name
 
   def json(self):
-    return {'name': self.name}
+    return {'name': self.name, 'filepath': self.filepath()}
 
   def __str__(self):
     return f"{self.name} "
+
+  def filepath(self):
+    return f"{self.id}_{self.name.strip()}"
+
+
 
 class Videos(Resource):
 
@@ -44,19 +52,25 @@ class Videos(Resource):
     if vid:
       return vid.json()
     else:
-      return {'name': None },404
+      return {'name': None }, 404
 
   def post(self, name):
     vid = Video(name=name)
     db.session.add(vid)
     db.session.commit()
+
+    if db.session.query(Video).count() > 10:
+      # Delete the video with the fewest likes
+      vid = Video.query.order_by(Video.upvotes.desc(), Video.downvotes.asc(), Video.date.desc()).first()
+      db.session.delete(vid)
+      db.session.commit()
+
     return vid.json()
 
   def delete(self,name):
     vid = Video.query.filter_by(name=name).first()
     db.session.delete(vid)
     db.session.commit()
-
     return {'note':'delete successful'}
 
 class AllVideos(Resource):
@@ -77,14 +91,27 @@ class DownVote(Resource):
     vid.downvotes += 1
     return { 'name': vid.name, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
 
+class Upload(Resource):
+  def post(self):
+    parse = reqparse.RequestParser()
+    parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+    parse.add_argument('name')
+    args = parse.parse_args()
+
+    args['file'].save('../src/assets/new_video')
+    # args['file'].filename
+
 api.add_resource(Videos, '/video/<string:name>')
 api.add_resource(AllVideos,'/videos')
 
 api.add_resource(UpVote, '/upvote/<int:id>')
 api.add_resource(DownVote, '/downvote/<int:id>')
 
+api.add_resource(Upload, '/upload')
+
 if __name__ == '__main__':
   app = create_app()
   api.init_app(app)
+  cors = CORS(app, resources={r"/*": {"origins": "*"}})
   app.run(debug=True)
 
