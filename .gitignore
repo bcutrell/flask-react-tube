@@ -10,3 +10,5 @@ __pycache__/
 data.sqlite
 
 config.py
+
+src/config.js

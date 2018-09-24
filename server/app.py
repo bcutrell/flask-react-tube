@@ -5,7 +5,10 @@ from flask_restful import Api,Resource
 from flask_migrate import Migrate
 from datetime import datetime
 
+from flask_cors import CORS
+
 from config import Config
+
 
 db = SQLAlchemy()
 api = Api()
@@ -50,6 +53,7 @@ class Videos(Resource):
       return {'name': None }, 404
 
   def post(self, name):
+    print(name)
     vid = Video(name=name)
     db.session.add(vid)
     db.session.commit()
@@ -95,5 +99,6 @@ api.add_resource(DownVote, '/downvote/<int:id>')
 if __name__ == '__main__':
   app = create_app()
   api.init_app(app)
+  cors = CORS(app, resources={r"/*": {"origins": "*"}})
   app.run(debug=True)
 
