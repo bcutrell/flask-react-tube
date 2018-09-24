@@ -13,12 +13,12 @@ const UploadModal = (props) => {
                         <Modal.Description>
                             <Form onSubmit={props.submit}>
                             <Form.Field>
-                                <label>Name</label>
-                                <input placeholder='Name' />
+                                <label>Title</label>
+                                <input placeholder='Title' name="title" id="title" />
                             </Form.Field>
                             <Form.Field>
                                 <label>Video</label>
-                                <input type="file" id="video" name="video" accept="video/mp4, video/MOV" />
+                                <input type="file" id="video" name="video" accept="video/*" />
                             </Form.Field>
                             <Button type='submit'>Submit</Button>
                             </Form>

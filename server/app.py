@@ -1,14 +1,14 @@
 import os
 from flask import Flask,  request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_restful import Api,Resource
+from flask_restful import Api, Resource, reqparse
 from flask_migrate import Migrate
 from datetime import datetime
 
+import werkzeug
+
 from flask_cors import CORS
-
 from config import Config
-
 
 db = SQLAlchemy()
 api = Api()
@@ -43,6 +43,8 @@ class Video(db.Model):
   def filepath(self):
     return f"{self.id}_{self.name.strip()}"
 
+
+
 class Videos(Resource):
 
   def get(self, name):
@@ -53,7 +55,6 @@ class Videos(Resource):
       return {'name': None }, 404
 
   def post(self, name):
-    print(name)
     vid = Video(name=name)
     db.session.add(vid)
     db.session.commit()
@@ -90,11 +91,23 @@ class DownVote(Resource):
     vid.downvotes += 1
     return { 'name': vid.name, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
 
+class Upload(Resource):
+  def post(self):
+    parse = reqparse.RequestParser()
+    parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+    parse.add_argument('name')
+    args = parse.parse_args()
+
+    args['file'].save('../src/assets/new_video')
+    # args['file'].filename
+
 api.add_resource(Videos, '/video/<string:name>')
 api.add_resource(AllVideos,'/videos')
 
 api.add_resource(UpVote, '/upvote/<int:id>')
 api.add_resource(DownVote, '/downvote/<int:id>')
+
+api.add_resource(Upload, '/upload')
 
 if __name__ == '__main__':
   app = create_app()

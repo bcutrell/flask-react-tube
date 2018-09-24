@@ -9,15 +9,14 @@ export const setVideos = (videos) => {
 };
 
 export const addVideo = (event) => {
-    // event.target.name,
-    // event.target.video
-    const data = {
-        name: 1,
-        video: 2
-    }
+
+    var formData = new FormData();
+    formData.append("file", event.target.video.files[0]);
+    formData.append("name", event.target.title.value);
+    const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
     return dispatch => {
-        axios.post('/video/new_video')
+        axios.post('/upload', formData, config)
             .then( response => {
                 console.log(response);
                 // dispatch(setVideos(response.data));
