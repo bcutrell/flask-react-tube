@@ -56,7 +56,7 @@ module.exports = {
       },
       {
         test: /\.(mp4|MOV)$/,
-        loader: 'file'
+        loader: 'file-loader'
       }
     ]
   },
