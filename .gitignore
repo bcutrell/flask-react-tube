@@ -2,6 +2,8 @@ node_modules
 .DS_Store
 /dist
 
+src/assets/test.MOV
+
 .cache/
 __pycache__/
 data.sqlite
