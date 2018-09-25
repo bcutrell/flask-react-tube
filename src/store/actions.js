@@ -39,3 +39,20 @@ export const initVideos = () => {
             })
     }
 };
+
+export const voteOnVideo = (event, id, type) => {
+    var formData = new FormData();
+    formData.append("type", type);
+    formData.append("id", id);
+
+    return dispatch => {
+        axios.post('vote', formData)
+            .then( response => {
+                dispatch(setVideos(response.data));
+            })
+            .catch(error => {
+                // dispatch(fetchVideosFailed());
+            })
+    }
+
+}

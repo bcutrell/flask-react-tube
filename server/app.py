@@ -38,7 +38,13 @@ class Video(db.Model):
     self.filepath=filepath
 
   def json(self):
-    return {'title': self.title, 'filepath': self.filepath }
+    return {
+      'title': self.title, 
+      'filepath': self.filepath, 
+      'id': self.id, 
+      'upvotes': self.upvotes, 
+      'downvotes': self.downvotes 
+    }
 
   def __str__(self):
     return f"{self.title} "
@@ -62,18 +68,25 @@ class AllVideos(Resource):
   def get(self):
     return [vid.json() for vid in Video.query.all()]
 
-# TODO Refactor this into a more reasonable rest structure...
-class UpVote(Resource):
-  def post(self, id):
-    vid = Video.query.filter_by(id=id).first()
-    vid.upvotes += 1
-    return { 'title': vid.title, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
-
-class DownVote(Resource):
-  def post(self, id):
-    vid = Video.query.filter_by(id=id).first()
-    vid.downvotes += 1
-    return { 'title': vid.title, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
+class Vote(Resource):
+  def post(self):
+    parse = reqparse.RequestParser()
+    parse.add_argument('id')
+    parse.add_argument('type')
+    args = parse.parse_args()
+    vid = Video.query.filter_by(id=args['id']).first()
+    
+    print(args)
+    if args['type'] == 'DOWN':
+      vid.downvotes += 1
+    
+    if args['type'] == 'UP':
+      vid.upvotes += 1
+    
+    print(vid.json())
+    db.session.add(vid)
+    db.session.commit()
+    return [vid.json() for vid in Video.query.all()]
 
 class Upload(Resource):
   def post(self):
@@ -98,11 +111,8 @@ class Upload(Resource):
 
 api.add_resource(Videos, '/video/<string:title>')
 api.add_resource(AllVideos,'/videos')
-
-api.add_resource(UpVote, '/upvote/<int:id>')
-api.add_resource(DownVote, '/downvote/<int:id>')
-
 api.add_resource(Upload, '/upload')
+api.add_resource(Vote, '/vote')
 
 if __name__ == '__main__':
   app = create_app()
