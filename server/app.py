@@ -16,6 +16,7 @@ api = Api()
 def create_app(config_class=Config):
   app = Flask(__name__)
   app.config.from_object(config_class)
+  cors = CORS(app, resources={r"/*": {"origins": "*"}}, headers="Content-Type")
   db.init_app(app)
   Migrate(app,db)
   return app
@@ -26,36 +27,77 @@ class Video(db.Model):
   __tablename__ = 'videos'
 
   id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(80), nullable=False)
+  title = db.Column(db.String(80), nullable=False)
+  filepath = db.Column(db.String(80))
   date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
   upvotes = db.Column(db.Integer, default=0)
   downvotes = db.Column(db.Integer, default=0)
 
-  def __init__(self,name):
-    self.name=name
+  def __init__(self,title, filepath):
+    self.title=title
+    self.filepath=filepath
 
   def json(self):
-    return {'name': self.name, 'filepath': self.filepath()}
+    return {
+      'title': self.title, 
+      'filepath': self.filepath, 
+      'id': self.id, 
+      'upvotes': self.upvotes, 
+      'downvotes': self.downvotes 
+    }
 
   def __str__(self):
-    return f"{self.name} "
-
-  def filepath(self):
-    return f"{self.id}_{self.name.strip()}"
-
-
+    return f"{self.title} "
 
 class Videos(Resource):
 
-  def get(self, name):
-    vid = Video.query.filter_by(name=name).first()
+  def get(self, title):
+    vid = Video.query.filter_by(title=title).first()
     if vid:
       return vid.json()
     else:
-      return {'name': None }, 404
+      return {'title': None }, 404
 
-  def post(self, name):
-    vid = Video(name=name)
+  def delete(self,title):
+    vid = Video.query.filter_by(title=title).first()
+    db.session.delete(vid)
+    db.session.commit()
+    return {'note':'delete successful'}
+
+class AllVideos(Resource):
+  def get(self):
+    return [vid.json() for vid in Video.query.all()]
+
+class Vote(Resource):
+  def post(self):
+    parse = reqparse.RequestParser()
+    parse.add_argument('id')
+    parse.add_argument('type')
+    args = parse.parse_args()
+    vid = Video.query.filter_by(id=args['id']).first()
+    
+    print(args)
+    if args['type'] == 'DOWN':
+      vid.downvotes += 1
+    
+    if args['type'] == 'UP':
+      vid.upvotes += 1
+    
+    print(vid.json())
+    db.session.add(vid)
+    db.session.commit()
+    return [vid.json() for vid in Video.query.all()]
+
+class Upload(Resource):
+  def post(self):
+    parse = reqparse.RequestParser()
+    parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+    parse.add_argument('title')
+    args = parse.parse_args()
+
+    filepath = '../src/assets/' + args['file'].filename
+    args['file'].save(filepath)
+    vid = Video(title=args['title'], filepath=filepath)
     db.session.add(vid)
     db.session.commit()
 
@@ -64,54 +106,17 @@ class Videos(Resource):
       vid = Video.query.order_by(Video.upvotes.desc(), Video.downvotes.asc(), Video.date.desc()).first()
       db.session.delete(vid)
       db.session.commit()
+    
+    return [vid.json() for vid in Video.query.all()]
 
-    return vid.json()
-
-  def delete(self,name):
-    vid = Video.query.filter_by(name=name).first()
-    db.session.delete(vid)
-    db.session.commit()
-    return {'note':'delete successful'}
-
-class AllVideos(Resource):
-  def get(self):
-    videos = Video.query.all()
-    return [vid.json() for vid in videos]
-
-# TODO Refactor this into a more reasonable rest structure...
-class UpVote(Resource):
-  def post(self, id):
-    vid = Video.query.filter_by(id=id).first()
-    vid.upvotes += 1
-    return { 'name': vid.name, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
-
-class DownVote(Resource):
-  def post(self, id):
-    vid = Video.query.filter_by(id=id).first()
-    vid.downvotes += 1
-    return { 'name': vid.name, 'upvotes': vid.upvotes, 'downvotes': vid.downvotes }
-
-class Upload(Resource):
-  def post(self):
-    parse = reqparse.RequestParser()
-    parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
-    parse.add_argument('name')
-    args = parse.parse_args()
-
-    args['file'].save('../src/assets/new_video')
-    # args['file'].filename
-
-api.add_resource(Videos, '/video/<string:name>')
+api.add_resource(Videos, '/video/<string:title>')
 api.add_resource(AllVideos,'/videos')
-
-api.add_resource(UpVote, '/upvote/<int:id>')
-api.add_resource(DownVote, '/downvote/<int:id>')
-
 api.add_resource(Upload, '/upload')
+api.add_resource(Vote, '/vote')
 
 if __name__ == '__main__':
   app = create_app()
   api.init_app(app)
-  cors = CORS(app, resources={r"/*": {"origins": "*"}})
+  
   app.run(debug=True)
 

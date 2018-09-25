@@ -5,24 +5,25 @@ import {Icon, Grid, Card, Button } from 'semantic-ui-react';
 
 const Gallery = (props) => {
     const cells = props.videos.map((video, i) => {
+
         return (
             <Grid.Column key={i} width={4}>
                 <Card>
                     <Card.Content>
-                        <Video source={video} />
+                        <Video source={video.filepath} />
                     </Card.Content>
 
                     <Card.Content extra>
                         <span>
-                        <a>
+                        <a onClick={(event) => props.vote(event, video.id, 'UP')}>
                             <Icon name='beer' />
-                            22
+                            { video.upvotes }
                         </a>
                         </span>
                         <span style={{ float: 'right'}}>
-                        <a>
+                        <a onClick={(event) => props.vote(event, video.id, 'DOWN')}>
                             <Icon name='beer' />
-                            -12
+                            { -video.downvotes }
                         </a>
                         </span>
                     </Card.Content>

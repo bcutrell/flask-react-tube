@@ -4,23 +4,24 @@ import { connect } from 'react-redux';
 import Gallery from '../components/Gallery';
 import UploadModal from '../components/UploadModal';
 
-// notes for loading all videos
-// https://github.com/gatsbyjs/gatsby/issues/3663
-import TestImage from '../assets/test.svg';
-import TestVideo from '../assets/test.MOV';
-
-import { addVideo } from '../store/actions';
+import { addVideo, initVideos, voteOnVideo } from '../store/actions';
 
 class Home extends Component {
-    state = {
-        videos: [TestVideo, TestVideo, TestVideo, TestVideo, TestVideo]
+    componentDidMount() {
+        this.props.onInitVideos();
     }
 
     render() {
+
+        let gallery = null;
+        if (this.props.videos ) {
+            gallery = <Gallery vote={this.props.onVideoVote} videos={this.props.videos} />
+        }
+
         return (
             <div style={ { marginTop: '75px' }}>
                 <UploadModal submit={this.props.onVideoAdded}  />
-                <Gallery videos={this.state.videos} />
+                { gallery }
             </div>
         )
     }
@@ -34,7 +35,10 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onVideoAdded: (videoName) => dispatch(addVideo(videoName)),
+        onVideoAdded: (event) => dispatch(addVideo(event)),
+        onInitVideos: (event) => dispatch(initVideos(event)),
+        onVideoVote: (event, id, type) => dispatch(voteOnVideo(event, id, type)),
+
     }
 }
 

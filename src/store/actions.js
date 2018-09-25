@@ -12,14 +12,14 @@ export const addVideo = (event) => {
 
     var formData = new FormData();
     formData.append("file", event.target.video.files[0]);
-    formData.append("name", event.target.title.value);
+    formData.append("title", event.target.title.value);
     const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
     return dispatch => {
         axios.post('/upload', formData, config)
             .then( response => {
                 console.log(response);
-                // dispatch(setVideos(response.data));
+                dispatch(setVideos(response.data));
             })
             .catch(error => {
                 // dispatch(addVideosFailed());
@@ -39,3 +39,20 @@ export const initVideos = () => {
             })
     }
 };
+
+export const voteOnVideo = (event, id, type) => {
+    var formData = new FormData();
+    formData.append("type", type);
+    formData.append("id", id);
+
+    return dispatch => {
+        axios.post('vote', formData)
+            .then( response => {
+                dispatch(setVideos(response.data));
+            })
+            .catch(error => {
+                // dispatch(fetchVideosFailed());
+            })
+    }
+
+}
