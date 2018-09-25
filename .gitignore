@@ -12,3 +12,4 @@ data.sqlite
 config.py
 
 src/config.js
+server/app.db

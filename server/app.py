@@ -60,8 +60,7 @@ class Videos(Resource):
 
 class AllVideos(Resource):
   def get(self):
-    videos = Video.query.all()
-    return [vid.json() for vid in videos]
+    return [vid.json() for vid in Video.query.all()]
 
 # TODO Refactor this into a more reasonable rest structure...
 class UpVote(Resource):

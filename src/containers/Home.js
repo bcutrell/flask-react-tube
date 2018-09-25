@@ -7,9 +7,12 @@ import UploadModal from '../components/UploadModal';
 // notes for loading all videos
 // https://github.com/gatsbyjs/gatsby/issues/3663
 
-import { addVideo } from '../store/actions';
+import { addVideo, initVideos } from '../store/actions';
 
 class Home extends Component {
+    componentDidMount() {
+        this.props.onInitVideos();
+    }
 
     render() {
 
@@ -37,6 +40,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         onVideoAdded: (videoName) => dispatch(addVideo(videoName)),
+        onInitVideos: (videoName) => dispatch(initVideos(videoName)),
     }
 }
 
