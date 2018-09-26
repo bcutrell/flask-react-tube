@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse
+import os
 from app.models import Video
 from app import db
 import werkzeug
@@ -10,11 +11,9 @@ class Upload(Resource):
     parse.add_argument('title')
     args = parse.parse_args()
 
-    # temp fix
-    filepath = 'app/static/' + args['file'].filename
-    sfilepath = 'static/' + args['file'].filename
+    filepath = args['file'].filename
     args['file'].save(filepath)
-    vid = Video(title=args['title'], filepath=sfilepath)
+    vid = Video(title=args['title'], filepath=filepath)
     db.session.add(vid)
     db.session.commit()
 
