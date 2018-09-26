@@ -18,7 +18,6 @@ export const addVideo = (event) => {
     return dispatch => {
         axios.post('/upload', formData, config)
             .then( response => {
-                console.log(response);
                 dispatch(setVideos(response.data));
             })
             .catch(error => {
