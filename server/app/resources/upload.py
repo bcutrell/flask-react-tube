@@ -1,4 +1,7 @@
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
+from app.models import Video
+from app import db
+import werkzeug
 
 class Upload(Resource):
   def post(self):
@@ -18,5 +21,5 @@ class Upload(Resource):
       vid = Video.query.order_by(Video.upvotes.desc(), Video.downvotes.asc(), Video.date.desc()).first()
       db.session.delete(vid)
       db.session.commit()
-    
+
     return [vid.json() for vid in Video.query.all()]

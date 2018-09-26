@@ -1,1 +1,2 @@
-web: gunicorn --chdir server server:app
+api: gunicorn --chdir server server:app
+web: npm run start
