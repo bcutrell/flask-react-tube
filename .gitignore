@@ -2,9 +2,6 @@ node_modules
 .DS_Store
 /dist
 
-src/assets/test.MOV
-src/assets/test.svg
-
 .cache/
 __pycache__/
 data.sqlite
@@ -13,3 +10,6 @@ config.py
 
 src/config.js
 server/app.db
+
+static
+assets

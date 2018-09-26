@@ -10,9 +10,11 @@ class Upload(Resource):
     parse.add_argument('title')
     args = parse.parse_args()
 
-    filepath = '../src/assets/' + args['file'].filename
+    # temp fix
+    filepath = 'app/static/' + args['file'].filename
+    sfilepath = 'static/' + args['file'].filename
     args['file'].save(filepath)
-    vid = Video(title=args['title'], filepath=filepath)
+    vid = Video(title=args['title'], filepath=sfilepath)
     db.session.add(vid)
     db.session.commit()
 
