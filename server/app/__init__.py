@@ -1,3 +1,4 @@
+import os
 from flask import Flask,  request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
@@ -10,7 +11,9 @@ migrate = Migrate()
 api = Api()
 
 def create_app(config_class=Config):
-  app = Flask(__name__)
+  # os.getcwd() needs to be a global config
+  app = Flask(__name__, static_url_path='', static_folder=os.path.join(os.getcwd(), 'dist'))
+
   app.config.from_object(config_class)
 
   cors = CORS(app, resources={r"/*": {"origins": "*"}}, headers="Content-Type")
