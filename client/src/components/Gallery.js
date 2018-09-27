@@ -1,13 +1,13 @@
 import React from 'react';
 import Video from './Video';
 
-import {Icon, Grid, Card, Button } from 'semantic-ui-react';
+import {Label, Icon, Grid, Card, Button } from 'semantic-ui-react';
 
 const Gallery = (props) => {
     const cells = props.videos.map((video, i) => {
 
         return (
-            <Grid.Column key={i} width={5}>
+            <Grid.Column key={i}>
                 <Card>
                     <Card.Content>
                         <Video source={video.filepath} />
@@ -15,16 +15,22 @@ const Gallery = (props) => {
 
                     <Card.Content extra>
                         <span>
-                        <a onClick={(event) => props.vote(event, video.id, 'UP')}>
-                            <Icon name='beer' />
-                            { video.upvotes }
-                        </a>
+                            <Button
+                                as='div'
+                                icon='beer'
+                                color='green'
+                                onClick={(event) => props.vote(event, video.id, 'UP')}
+                                label={{ as: 'a', basic: true, pointing: 'right', content: video.upvotes }}
+                                labelPosition='left' />
                         </span>
                         <span style={{ float: 'right'}}>
-                        <a onClick={(event) => props.vote(event, video.id, 'DOWN')}>
-                            <Icon name='beer' />
-                            { -video.downvotes }
-                        </a>
+                            <Button
+                                as='div'
+                                icon='beer'
+                                color='red'
+                                onClick={(event) => props.vote(event, video.id, 'DOWN')}
+                                label={{ as: 'a', basic: true, pointing: 'left', content: -video.downvotes }}
+                                labelPosition='right' />
                         </span>
                     </Card.Content>
                 </Card>
@@ -34,7 +40,7 @@ const Gallery = (props) => {
     });
 
     return (
-        <Grid stackable>
+        <Grid stackable columns={2}>
             { cells }
         </Grid>
     )
