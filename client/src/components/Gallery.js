@@ -7,7 +7,7 @@ const Gallery = (props) => {
     const cells = props.videos.map((video, i) => {
 
         return (
-            <Grid.Column key={i} width={4}>
+            <Grid.Column key={i} width={5}>
                 <Card>
                     <Card.Content>
                         <Video source={video.filepath} />

@@ -13,3 +13,4 @@ server/app.db
 
 static
 assets
+*.pyc
