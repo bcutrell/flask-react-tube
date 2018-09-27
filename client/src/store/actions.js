@@ -8,6 +8,13 @@ export const setVideos = (videos) => {
     }
 };
 
+
+export const toggleModal = () => {
+    return {
+        type: actionTypes.TOGGLE_MODAL
+    }
+}
+
 export const addVideo = (event) => {
 
     var formData = new FormData();
