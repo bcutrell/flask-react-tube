@@ -12,7 +12,7 @@ api = Api()
 
 def create_app(config_class=Config):
   # os.getcwd() needs to be a global config
-  app = Flask(__name__, static_url_path='', static_folder=os.path.join(os.getcwd(), 'dist'))
+  app = Flask(__name__)
 
   app.config.from_object(config_class)
 
