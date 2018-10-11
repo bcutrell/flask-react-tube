@@ -9,6 +9,7 @@ from flask_cors import CORS
 db = SQLAlchemy()
 migrate = Migrate()
 api = Api()
+config = Config()
 
 def create_app(config_class=Config):
   # os.getcwd() needs to be a global config
