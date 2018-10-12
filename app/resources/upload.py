@@ -13,7 +13,11 @@ class Upload(Resource):
     args = parse.parse_args()
 
     filepath = os.path.join(config.UPLOAD_FOLDER, args['file'].filename)
-    args['file'].save(filepath)
+    if config.ENV == 'development':
+      args['file'].save('client/' + filepath)
+    else:
+      args['file'].save(filepath)
+
     vid = Video(title=args['title'], filepath=filepath)
     db.session.add(vid)
     db.session.commit()

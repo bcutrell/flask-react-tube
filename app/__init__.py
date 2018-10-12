@@ -13,7 +13,7 @@ config = Config()
 
 def create_app(config_class=Config):
   # os.getcwd() needs to be a global config
-  app = Flask(__name__)
+  app = Flask(__name__, static_folder='')
 
   app.config.from_object(config_class)
 
