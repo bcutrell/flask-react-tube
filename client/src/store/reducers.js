@@ -14,7 +14,6 @@ const addVideo = ( state, action ) => {
 }
 
 const reducer = ( state = initialState, action ) => {
-    console.log(state.modalOpen)
     switch ( action.type ) {
         case actionTypes.ADD_VIDEO: return addVideo( state, action );
         case actionTypes.TOGGLE_MODAL: return { ...state, modalOpen: !state.modalOpen }

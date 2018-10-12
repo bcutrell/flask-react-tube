@@ -1,2 +1,0 @@
-api: python3 server/server.py
-web: cd client; npm run start

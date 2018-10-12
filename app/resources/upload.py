@@ -1,7 +1,8 @@
 from flask_restful import Resource, reqparse
 import os
+from flask import url_for
 from app.models import Video
-from app import db
+from app import db, config
 import werkzeug
 
 class Upload(Resource):
@@ -11,8 +12,12 @@ class Upload(Resource):
     parse.add_argument('title')
     args = parse.parse_args()
 
-    filepath = args['file'].filename
-    args['file'].save(filepath)
+    filepath = os.path.join(config.UPLOAD_FOLDER, args['file'].filename)
+    if config.ENV == 'development':
+      args['file'].save('client/' + filepath)
+    else:
+      args['file'].save(filepath)
+
     vid = Video(title=args['title'], filepath=filepath)
     db.session.add(vid)
     db.session.commit()
