@@ -1,5 +1,6 @@
 import unittest
-from app import create_app, api, db, Video
+from app import create_app, db
+from app.models import Video
 import json
 from config import Config
 
@@ -12,7 +13,6 @@ class TestConfig(Config):
 class TestIntegrations(unittest.TestCase):
   def setUp(self):
     self.app = create_app(TestConfig)
-    api.init_app(self.app)
     self.app_context = self.app.app_context()
     self.app_context.push()
 
@@ -24,8 +24,8 @@ class TestIntegrations(unittest.TestCase):
     db.drop_all()
     self.app_context.pop()
 
-  def test_post(self):
-    response = self.test_client.post('/video/new_video')
+  def test_upload(self):
+    response = self.test_client.post('/upload', { file: 'fake', title: 'new_video'})
 
     assert response.get_json() == {'name': 'new_video', 'filepath': '1_new_video'}
     assert json.loads(response.data) == {'name': 'new_video', 'filepath': '1_new_video'}
@@ -62,7 +62,7 @@ class TestIntegrations(unittest.TestCase):
     assert db.session.query(Video).count() == 10
 
   def create_video(self):
-    cast = Video('Cast Away')
+    cast = Video('Cast Away', 'castaway.mp4')
     db.session.add(cast)
     db.session.commit()
     return cast
