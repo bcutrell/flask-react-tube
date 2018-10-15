@@ -4,6 +4,11 @@ from app.models import Video
 import json
 from config import Config
 
+import io
+import werkzeug
+from werkzeug.datastructures import FileStorage
+
+
 # import code; # code.interact(local=dict(globals(), **locals()))
 
 class TestConfig(Config):
@@ -25,47 +30,13 @@ class TestIntegrations(unittest.TestCase):
     self.app_context.pop()
 
   def test_upload(self):
-    response = self.test_client.post('/upload', { file: 'fake', title: 'new_video'})
+    f = FileStorage(filename='test.mp4')
+    response = self.test_client.post('/upload', data={ 'file': f, 'title': 'new_video'})
 
-    assert response.get_json() == {'name': 'new_video', 'filepath': '1_new_video'}
-    assert json.loads(response.data) == {'name': 'new_video', 'filepath': '1_new_video'}
-
-  def test_get(self):
-    vid = self.create_video()
-
-    response = self.test_client.get('/video/%s' % vid.name)
-    assert json.loads(response.data) == { 'name': vid.name, 'filepath': vid.filepath() }
-
-  def test_upvote(self):
-    vid = self.create_video()
-    assert vid.upvotes == 0
-
-    response = self.test_client.post('/upvote/%s' % vid.id)
-    assert json.loads(response.data) == { 'name': vid.name, 'upvotes': 1, 'downvotes': 0 }
-
-  def test_downvote(self):
-    vid = self.create_video()
-    assert vid.upvotes == 0
-
-    response = self.test_client.post('/downvote/%s' % vid.id)
-    assert json.loads(response.data) == { 'name': vid.name, 'upvotes': 0, 'downvotes': 1 }
-
-  def test_post_delete_if_more_than_10(self):
-    # create 10 videos
-    [ self.create_video() for n in range(10) ]
-
-    response = self.test_client.post('/video/new_video')
-    assert response.get_json() == {'name': 'new_video',  'filepath': '11_new_video'}
-    assert json.loads(response.data) == {'name': 'new_video',  'filepath': '11_new_video'}
-
-    # There are still only 10 videos
-    assert db.session.query(Video).count() == 10
-
-  def create_video(self):
-    cast = Video('Cast Away', 'castaway.mp4')
-    db.session.add(cast)
-    db.session.commit()
-    return cast
+    assert response.get_json() == [{'title': 'new_video', 'filepath': 'static/uploads/test.mp4', 'id': 1, 'upvotes': 0, 'downvotes': 0}]
+    assert json.loads(response.data) == [{'title': 'new_video', 'filepath': 'static/uploads/test.mp4', 'id': 1, 'upvotes': 0, 'downvotes': 0}]
 
 if __name__ == '__main__':
   unittest.main()
+
+
