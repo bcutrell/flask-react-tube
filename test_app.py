@@ -1,15 +1,9 @@
 import unittest
-from app import create_app, db
-from app.models import Video
-import json
-from config import Config
-
 import io
-import werkzeug
-from werkzeug.datastructures import FileStorage
+import json
 
-
-# import code; # code.interact(local=dict(globals(), **locals()))
+from app import app, db
+from config import Config
 
 class TestConfig(Config):
   TESTING = True
@@ -17,11 +11,11 @@ class TestConfig(Config):
 
 class TestIntegrations(unittest.TestCase):
   def setUp(self):
-    self.app = create_app(TestConfig)
-    self.app_context = self.app.app_context()
+    app.config.from_object(TestConfig)
+    self.app_context = app.app_context()
     self.app_context.push()
 
-    self.test_client = self.app.test_client()
+    self.test_client = app.test_client()
     db.create_all()
 
   def tearDown(self):
@@ -30,13 +24,26 @@ class TestIntegrations(unittest.TestCase):
     self.app_context.pop()
 
   def test_upload(self):
-    f = FileStorage(filename='test.mp4')
-    response = self.test_client.post('/upload', data={ 'file': f, 'title': 'new_video'})
+    with open('./static/uploads/test.mp4', 'rb') as f:
+      # create a file-like object
+      f = io.BytesIO(f.read())
+    
+    # post request to upload endpoint
+    data = {}
+    data['file'] = (io.BytesIO(b"abcdef"), 'test.mp4')
+    
+    response = self.test_client.post('/upload', data=data, content_type='multipart/form-data')
 
-    assert response.get_json() == [{'title': 'new_video', 'filepath': 'static/uploads/test.mp4', 'id': 1, 'upvotes': 0, 'downvotes': 0}]
-    assert json.loads(response.data) == [{'title': 'new_video', 'filepath': 'static/uploads/test.mp4', 'id': 1, 'upvotes': 0, 'downvotes': 0}]
+    expected = {
+      'title': 'file', 
+      'filepath': app.config['UPLOAD_FOLDER'] + '/test.mp4', 
+      'id': 1, 
+      'upvotes': 0, 
+      'downvotes': 0
+    }
+    
+    assert response.get_json() == [expected]
+    assert json.loads(response.data) == [expected]
 
 if __name__ == '__main__':
-  unittest.main()
-
-
+  unittest.main() 
