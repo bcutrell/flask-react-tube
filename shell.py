@@ -6,10 +6,8 @@ from pprint import pprint
 
 from flask import *
 
-from app import create_app, db
-from app.models import Video
+from app import app, db
+from app import Video
 
-app = create_app()
 app.app_context().push()
-
 os.environ['PYTHONINSPECT'] = 'True'

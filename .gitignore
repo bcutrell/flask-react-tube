@@ -9,7 +9,6 @@ data.sqlite
 config.py
 
 src/config.js
-server/app.db
 
 static
 assets
@@ -17,3 +16,5 @@ assets
 
 .vscode
 migrations
+
+app.db

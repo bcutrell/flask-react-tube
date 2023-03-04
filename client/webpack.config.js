@@ -1,70 +1,34 @@
 const path = require('path');
-const autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  devtool: 'cheap-module-eval-source-map',
-  entry: "./src/index.js",
+  entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: "bundle.js",
-    chunkFilename: '[id].js',
-    publicPath: ''
-  },
-  resolve: {
-    extensions: ['.js', '.jsx']
+    filename: 'bundle.js',
   },
   module: {
     rules: [
       {
         test: /\.js$/,
-        loader: 'babel-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+        },
       },
       {
         test: /\.css$/,
-        exclude: /node_modules/,
-        use: [
-          { loader: 'style-loader' },
-          {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 1,
-              modules: true,
-              localIdentName: '[name]__[local]__[hash:base64:5]'
-            }
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              indent: 'postcss',
-              plugins: () => [
-                autoprefixer({
-                  browsers: [
-                    "> 1%",
-                    "last 2 versions"
-                  ]
-                })
-              ]
-            }
-          }
-        ]
+        use: ['style-loader', 'css-loader'],
       },
       {
-        test: /\.(png|jpe?g|gif|svg)$/,
-        loader: 'url-loader?limit=8000&name=images/[name].[ext]'
+        test: /\.(png|svg|jpg|gif)$/,
+        use: ['file-loader'],
       },
-      {
-        test: /\.(mp4|MOV)$/,
-        loader: 'file-loader'
-      }
-    ]
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: __dirname + '/src/index.html',
-      filename: 'index.html',
-      inject: 'body'
-    })
-  ]
+      template: './src/index.html',
+    }),
+  ],
 };
