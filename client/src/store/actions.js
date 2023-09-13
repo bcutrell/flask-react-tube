@@ -1,5 +1,4 @@
 import * as actionTypes from './actionTypes';
-import axios from '../axios';
 
 export const setVideos = (videos) => {
     return {
@@ -7,7 +6,6 @@ export const setVideos = (videos) => {
         videos: videos
     }
 };
-
 
 export const toggleModal = () => {
     return {
@@ -23,26 +21,31 @@ export const addVideo = (event) => {
     const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
     return dispatch => {
-        axios.post('/upload', formData, config)
-            .then( response => {
-                dispatch(setVideos(response.data));
-            })
-            .catch(error => {
-                // dispatch(addVideosFailed());
-                console.log(error);
-            })
+        fetch('http://127.0.0.1:5000/upload', {
+            method: 'POST',
+            body: formData,
+            headers: config.headers
+        })
+        .then(response => response.json())
+        .then(data => {
+            dispatch(setVideos(data));
+        })
+        .catch(error => {
+            console.log(error);
+        })
     }
 };
 
 export const initVideos = () => {
     return dispatch => {
-        axios.get('videos')
-            .then( response => {
-                dispatch(setVideos(response.data));
-            })
-            .catch(error => {
-                // dispatch(fetchVideosFailed());
-            })
+        fetch('http://127.0.0.1:5000/videos')
+        .then(response => response.json())
+        .then(data => {
+            dispatch(setVideos(data));
+        })
+        .catch(error => {
+            console.log(error);
+        })
     }
 };
 
@@ -52,13 +55,16 @@ export const voteOnVideo = (event, id, type) => {
     formData.append("id", id);
 
     return dispatch => {
-        axios.post('vote', formData)
-            .then( response => {
-                dispatch(setVideos(response.data));
-            })
-            .catch(error => {
-                // dispatch(fetchVideosFailed());
-            })
+        fetch('http://127.0.0.1:5000/vote', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            dispatch(setVideos(data));
+        })
+        .catch(error => {
+            console.log(error);
+        })
     }
-
-}
+};
