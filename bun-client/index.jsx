@@ -1,6 +1,14 @@
 import "react";
 import { renderToReadableStream } from "react-dom/server";
-import { Menu, Container } from 'semantic-ui-react'
+import { Menu, Container } from 'semantic-ui-react';
+
+function Home(props) {
+  return (
+    <div style={ { marginTop: '75px' }}>
+      <button className="ui button" role="button">Upload</button>
+    </div>
+  )
+};
 
 function App(props) {
   return (
@@ -17,7 +25,7 @@ function App(props) {
       </Menu>
 
     <Container>
-        <button className="ui button" role="button">Upload</button>
+      <Home/>
     </Container>
   </div>
    );
@@ -26,11 +34,16 @@ function App(props) {
 const server = Bun.serve({
     port: 3000,
     async fetch(request) {
-        const stream = await renderToReadableStream(<App />);
-        return new Response(stream, {
-            headers: { "Content-Type": "text/html" },
-        });
-    },
+        const url = new URL(request.url);
+
+        if (url.pathname === "/") {
+            const stream = await renderToReadableStream(<App />);
+            return new Response(stream, {
+                headers: { "Content-Type": "text/html" },
+            });
+        }
+        return new Response("Not Found", { status: 404 });
+    }
 });
 
 console.log(`Listening on localhost: ${server.port}`);
