@@ -61,6 +61,10 @@ const server = Bun.serve({
         const url = new URL(request.url);
 
         if (url.pathname === "/") {
+            const response = await fetch("http://localhost:5000/videos");
+            const results = (await response.json());
+            console.log(results);
+
             const stream = await renderToReadableStream(<App />);
             return new Response(stream, {
                 headers: { "Content-Type": "text/html" },
