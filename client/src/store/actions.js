@@ -14,18 +14,19 @@ export const toggleModal = () => {
 }
 
 export const addVideo = (event) => {
+    console.log("addVideo");
+    const data = new FormData();
+    console.log(event.target.video.files[0]);
+    data.append('file', event.target.video.files[0]);
+    data.append('title', event.target.title.value);
 
-    var formData = new FormData();
-    formData.append("file", event.target.video.files[0]);
-    formData.append("title", event.target.title.value);
-    const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+    const config = {
+        method: 'POST',
+        body: data,
+      };
 
     return dispatch => {
-        fetch('http://127.0.0.1:5000/upload', {
-            method: 'POST',
-            body: formData,
-            headers: config.headers
-        })
+        fetch('http://127.0.0.1:5000/upload', config)
         .then(response => response.json())
         .then(data => {
             dispatch(setVideos(data));
@@ -37,6 +38,7 @@ export const addVideo = (event) => {
 };
 
 export const initVideos = () => {
+    console.log("initVideos");
     return dispatch => {
         fetch('http://127.0.0.1:5000/videos')
         .then(response => response.json())
@@ -54,11 +56,18 @@ export const voteOnVideo = (event, id, type) => {
     formData.append("type", type);
     formData.append("id", id);
 
+    const data = { id, type };
+
+    const config = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    };
+
     return dispatch => {
-        fetch('http://127.0.0.1:5000/vote', {
-            method: 'POST',
-            body: formData
-        })
+        fetch('http://127.0.0.1:5000/vote', config)
         .then(response => response.json())
         .then(data => {
             dispatch(setVideos(data));

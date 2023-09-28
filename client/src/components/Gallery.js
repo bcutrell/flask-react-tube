@@ -5,12 +5,13 @@ import {Label, Icon, Grid, Card, Button } from 'semantic-ui-react';
 
 const Gallery = (props) => {
     const cells = props.videos.map((video, i) => {
+        console.log(video);
 
         return (
             <Grid.Column key={i}>
                 <Card>
                     <Card.Content>
-                        <Video source={video.filepath} />
+                        <Video source={video.file_url} />
                     </Card.Content>
 
                     <Card.Content extra>
